@@ -5,6 +5,7 @@
 extern stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle);
 
 stcode_t dummy_handle(arg_t* args, void* usrargs) {
+  DBG_DEBUG("Dummy command called!\n");
   return ok_e;
 }
 
@@ -64,11 +65,11 @@ const cmddef_t cmd_a[] = {
 };
 
 int main(void) {
-  tinycmd_t tab;
-  cmd_t handle;
   char rawstr[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq f233 r10 q-40";
-  tab.cmdtab = cmd_a;
-  tab.size = sizeof(cmd_a) / sizeof(cmddef_t);
-  _parse_str(rawstr, &tab, &handle);
+  stcode_t ret = tinycmd_init(cmd_a, sizeof(cmd_a) / sizeof(cmddef_t));
+  if(ret == ok_e) {
+    DBG_DEBUG("Init ok!\n");
+    tinycmd_exec(rawstr);
+  }
   return 0;
 }

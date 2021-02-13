@@ -52,7 +52,7 @@ typedef struct cmddef_s {
 typedef struct cmd_s {
   tinycmd_cb_t callback;
   arg_t args[TINYCMD_ARG_MAX_SIZE];
-  void* usrargs;
+  void* usrdata;
 } cmd_t;
 
 typedef struct tinycmd_s {
@@ -60,9 +60,9 @@ typedef struct tinycmd_s {
   size_t size;
 } tinycmd_t;
 
-stcode_t tinycmd_init(cmddef_t* table, size_t size);
+stcode_t tinycmd_init(const cmddef_t* table, size_t size);
 
-stcode_t tinycmd_exec(const char* str);
+stcode_t tinycmd_exec(char* str);
 
 stcode_t tinycmd_loop(void);
 

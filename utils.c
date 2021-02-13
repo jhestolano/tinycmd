@@ -20,7 +20,7 @@ static stcode_t _bufop(uint8_t* buf, size_t bufsz, void* data, size_t datasz, ui
     } else if (toorfrom == _BUFOP_FROM) {
       /* Handle data restore from buffer. */
       memcpy(data, buf, datasz);
-      ret = ok_e;	
+      ret = ok_e;
     } else {
       ret = internal_e;
     }
