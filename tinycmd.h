@@ -16,6 +16,10 @@
 /* Max. string length for a raw command. */
 #define TINYCMD_RAW_STR_MAX_SIZE (64)
 
+/* Macro used to tell tinycmd to not worry about the name of the parameter, */
+/* as the command only allows for one unique argument. */
+#define TINYCMD_UNIQUE_ARG ('\0')
+
 typedef enum argtype_e {
   arg_u8_e = 0,
   arg_u16_e,
@@ -39,6 +43,15 @@ typedef struct arg_s {
   /* tinycmd_base_t data; */
   uint8_t is_valid;
 } arg_t;
+
+#define TINYCMD_ARG_LIST_END {arg_none_type_e, ''}
+#define TINYCMD_USRDATA_NONE ((void*)NULL)
+#define TINYCMD_ARG_USR_NONE (NULL)
+
+#define TINYCMD_TABLE_SIZE(x) (sizeof((x)) / sizeof(cmddef_t))
+#define TINYCMD_ARG_IS_VALID(_args, _idx) ((_args)[(_idx)].is_valid)
+#define TINYCMD_ARG(_args, _idx, _type) (_type)(*(((_type*)(&(_args)[(_idx)].data))))
+#define TINYCMD_ARG_NONE {{arg_none_type_e, 0}}
 
 typedef enum stcode_e (*tinycmd_cb_t)(arg_t* arg, void* usrdata);
 

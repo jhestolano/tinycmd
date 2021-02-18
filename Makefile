@@ -2,19 +2,29 @@ PROJ_NAME=tinycmd
 BUILD_DIR=./build
 
 
-INC_DIRS+=.
+TESTS_DIR=./tests
 
-SRCS=main.c \
-		 tinycmd.c \
-		 st.c \
-		 utils.c \
+INC_DIRS=. \
+	$(TESTS_DIR) \
+	$(TESTS_DIR)/Unity \
+
+SRCS=tinycmd.c \
+	st.c \
+	utils.c \
+
+TEST_SRCS=$(TESTS_DIR)/test_main.c \
+	$(TESTS_DIR)/test_cmd.c \
+	$(TESTS_DIR)/Unity/unity.c \
  
 OBJS:=$(SRCS:%=$(BUILD_DIR)/%.o)
+
+TEST_OBJS:=$(TEST_SRCS:%=$(BUILD_DIR)/%.o)
 
 CC=gcc
 OBJCOPY=objcopy
 OBJDUMP=objdump
 GDB=gdb
+AR=ar
 
 # Project Defines.
 DEFS=-D__DBG__
@@ -23,10 +33,8 @@ TARGET_FLAGS=
 
 CFLAGS=$(TARGET_FLAGS) \
 	-g \
-	-Os \
+	-O0 \
 	-Wall \
-
-LINKER_FILE=./linker/stm32f30_flash.ld
 
 LFLAGS=$(TARGET_FLAGS) \
 
@@ -37,7 +45,7 @@ INCLUDE=$(addprefix -I,$(INC_DIRS))
 # this will not need to be debugged. Use the same LIB_FLAGS for all libraries.
 # $(HAL_OBJS): CFLAGS:=$(LIB_FLAGS)
 $(BUILD_DIR)/$(PROJ_NAME): $(OBJS)
-	$(CC) $(INCLUDE) $(DEFS) $(CFLAGS) $(OBJS) -o $@.out $(LFLAGS)
+	$(AR) rcs $@.a $^
 
 $(BUILD_DIR)/%.c.o: %.c
 	mkdir -p $(dir $@)
@@ -53,4 +61,7 @@ clean:
 debug: $(BUILD_DIR)/$(PROJ_NAME)
 	$(GDB) $^.out
 
-.PHONY: clean $(PROJ_NAME) debug
+tests: $(TEST_OBJS) $(OBJS)
+	$(CC) $(INCLUDE) $(DEFS) $(CFLAGS) $^ -o $(BUILD_DIR)/$@.out $(LFLAGS)
+
+.PHONY: clean $(PROJ_NAME) debug tests

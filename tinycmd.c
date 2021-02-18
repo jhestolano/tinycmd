@@ -31,19 +31,26 @@ stcode_t _get_arg(char *rawstr, const argdef_t* argdef_a, arg_t* arg) {
     DBG_DEBUG("Searching param %s\n", rawstr);
     for(i = 0; (i < (TINYCMD_ARG_MAX_SIZE)) && (ret == not_found_e); i++) {
       DBG_DEBUG("Trying: %c\n", argdef_a[i].name);
-      if(argname == argdef_a[i].name) {
+      if(argdef_a[i].name == TINYCMD_UNIQUE_ARG) {
+        arg[0].def = &argdef_a[0];
+        arg[0].is_valid = 1;
+        ret = _strtonum_fp[arg[0].def->type](rawstr, arg[0].data);
+        /* All that is needed to be done. No furher arguments. Return now. */
+        break;
+      } else if(argname == argdef_a[i].name) {
         arg[i].def = &argdef_a[i];
         arg[i].is_valid = 1;
         DBG_DEBUG("Arg valid: %c\n", arg[i].def->name);
         if(_strtonum_fp[arg[i].def->type]) {
           ret = _strtonum_fp[arg[i].def->type](rawstr + 1, arg[i].data);
-        } 
+        }
+      } else {
+        /* Iterate next argument. */
       }
     }
   } else {
     ret = null_ptr_e;
   }
-
   if(ret == ok_e) {
     DBG_DEBUG("Conversion ok\n");
   } else {
@@ -74,6 +81,20 @@ stcode_t _get_cmddef(char* cmdstr, const tinycmd_t * table, const cmddef_t** cmd
   return ret;
 }
 
+stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) {
+  char* ctxptr = rawstr;
+  char* tok;
+  stcode_t ret = inv_arg_e;
+  DBG_DEBUG("Raw token: %s\n", rawstr);
+  tok = strtok_r(ctxptr, " ", &ctxptr);
+  while(tok) {
+    DBG_DEBUG("Token: %s\n", tok);
+    ret = _get_arg(tok, cmddef->argdef, handle->args);
+    tok = strtok_r(ctxptr, " ", &ctxptr);
+  }
+  return ret;
+}
+
 stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
   stcode_t ret = generic_e;
   char* ctxptr = str;
@@ -91,11 +112,7 @@ stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
     } if (ret == ok_e) {
       DBG_DEBUG("Command: %s\n", tok);
       cmdname = tok;
-      while(*ctxptr) {
-        DBG_DEBUG("Token: %s\n", ctxptr);
-        tok = strtok_r(ctxptr, " ", &ctxptr);
-        ret = _get_arg(tok, cmddef->argdef, handle->args);
-      }
+      ret = _iter_args(ctxptr, cmddef, handle);
     }
     if(ret == ok_e) {
       for(size_t i = 0; i < table->size; i++) {
@@ -107,14 +124,13 @@ stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
         }
       }
     }
-
   } else {
     DBG_ERR("Invalid input arguments\n");
   }
   return ret;
 }
 
-stcode_t tinycmd_init(cmddef_t* table, size_t size) {
+stcode_t tinycmd_init(const cmddef_t* table, size_t size) {
    stcode_t ret = inv_arg_e;
   _cmdtab_ps.cmdtab = NULL;
   _cmdtab_ps.size = 0;
