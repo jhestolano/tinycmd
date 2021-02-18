@@ -20,6 +20,8 @@
 /* as the command only allows for one unique argument. */
 #define TINYCMD_UNIQUE_ARG ('\0')
 
+const char* TinyCmdDelimStr = " ";
+
 typedef enum argtype_e {
   arg_u8_e = 0,
   arg_u16_e,

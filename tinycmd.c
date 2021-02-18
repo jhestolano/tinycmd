@@ -1,18 +1,18 @@
-#include "tinycmd.h"
 #include <string.h>
-#include "dbg.h"
 #include <stdlib.h>
+#include "tinycmd.h"
+#include "dbg.h"
 #include "utils.h"
+#include "staticdef.h"
 
-const char* TinyCmdDelimStr = " ";
 
-static tinycmd_t _cmdtab_ps = {0};
+STATIC tinycmd_t _cmdtab_ps = {0};
 
 typedef stcode_t (*strtonum_t)(const char* rawstr, void* buf);
 
 /* Holds the conversion functions from string to ints. The function call index */
 /* must match that of the enumeration, as it is used as the actual index. */
-static const strtonum_t _strtonum_fp[] = {
+STATIC const strtonum_t _strtonum_fp[] = {
   utils_strtou8,
   utils_strtou16,
   utils_strtou32,
@@ -22,7 +22,7 @@ static const strtonum_t _strtonum_fp[] = {
   NULL,
 };
 
-stcode_t _get_arg(char *rawstr, const argdef_t* argdef_a, arg_t* arg) {
+STATIC stcode_t _get_arg(char *rawstr, const argdef_t* argdef_a, arg_t* arg) {
   stcode_t ret = generic_e;
   char argname = rawstr[0];
   size_t i;
@@ -59,7 +59,7 @@ stcode_t _get_arg(char *rawstr, const argdef_t* argdef_a, arg_t* arg) {
   return ret;
 }
 
-stcode_t _get_cmddef(char* cmdstr, const tinycmd_t * table, const cmddef_t** cmddef) {
+STATIC stcode_t _get_cmddef(char* cmdstr, const tinycmd_t * table, const cmddef_t** cmddef) {
   stcode_t ret = generic_e;
   uint8_t i;
   size_t table_sz;
@@ -81,7 +81,7 @@ stcode_t _get_cmddef(char* cmdstr, const tinycmd_t * table, const cmddef_t** cmd
   return ret;
 }
 
-stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) {
+STATIC stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) {
   char* ctxptr = rawstr;
   char* tok;
   stcode_t ret = inv_arg_e;
@@ -95,7 +95,7 @@ stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) {
   return ret;
 }
 
-stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
+STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
   stcode_t ret = generic_e;
   char* ctxptr = str;
   char* tok;

@@ -61,6 +61,7 @@ clean:
 debug: $(BUILD_DIR)/$(PROJ_NAME)
 	$(GDB) $^.out
 
+tests:DEFS+=-DUNIT_TEST
 tests: $(TEST_OBJS) $(OBJS)
 	$(CC) $(INCLUDE) $(DEFS) $(CFLAGS) $^ -o $(BUILD_DIR)/$@.out $(LFLAGS)
 
