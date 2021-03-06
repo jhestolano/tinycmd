@@ -4,12 +4,23 @@
 #include <string.h>
 #include "utils.h"
 #include "tinycmd.h"
+#include "dbg.h"
 
 stcode_t cmd_1(arg_t* args, void* usrargs) {
   (void)args;
   (void)usrargs;
   return ok_e;
 }
+
+stcode_t dummy_handle(arg_t* args, void* usrargs) {
+   (void)usrargs;
+   (void)args;
+   /* int8_t r = TINYCMD_ARG(args, 0, int8_t); */
+   /* int16_t q = TINYCMD_ARG(args, 1, int16_t); */
+   /* int32_t f = TINYCMD_ARG(args, 2, int32_t); */
+   return ok_e;
+}
+
 
 extern stcode_t _get_cmddef(const char* cmdstr, const tinycmd_t * cmd_table, const cmddef_t** info);
 
@@ -18,6 +29,50 @@ extern stcode_t _get_cmddef(const char* cmdstr, const tinycmd_t * cmd_table, con
 extern stcode_t _parse_str(const char* rawstr, const tinycmd_t* table_sa, cmd_t* handle);
 
 extern stcode_t _get_arg(const char* rawstr, const argdef_t* argdesc_a, arg_t* arg);
+
+extern stcode_t _iter_args(char *str, const cmddef_t* cmddef, cmd_t* handle);
+
+void test__iter_args(void) {
+  stcode_t res;
+  /* char* ctxptr; */
+  /* char* tok; */
+  char rawstr[] = "p124 i-12 d44";
+  cmd_t handle;
+  cmddef_t cmddef = {
+     /* Command Name. */
+     .name = "pid",
+
+     /* Command Handle. */
+     .callback = dummy_handle,
+
+     /* Argument Description. */
+     .argdef = {
+        {.type = arg_i32_e, .name = 'p'},
+        {.type = arg_i32_e, .name = 'i'},
+        {.type = arg_i32_e, .name = 'd'},
+     },
+
+     /* User argument. */
+     .usrdata = NULL,
+  };
+
+  memset((void*)&handle, 0, sizeof(handle));
+
+  res = _iter_args(NULL, NULL, NULL);
+  TEST_ASSERT_EQUAL_INT32(res, null_ptr_e);
+  res = _iter_args(rawstr, NULL, NULL);
+  TEST_ASSERT_EQUAL_INT32(res, null_ptr_e);
+  res = _iter_args(rawstr, &cmddef, NULL);
+  TEST_ASSERT_EQUAL_INT32(res, null_ptr_e);
+  res = _iter_args(rawstr, &cmddef, &handle);
+  TEST_ASSERT_EQUAL_INT32(res, ok_e);
+
+  /* This function does not set the handle callback. */
+  TEST_ASSERT_EQUAL_PTR(NULL, handle.callback);
+  TEST_ASSERT_TRUE(handle.args[0].is_valid);
+  TEST_ASSERT_TRUE(handle.args[1].is_valid);
+  TEST_ASSERT_TRUE(handle.args[2].is_valid);
+}
 
 void test__get_param(void) {
    /*************************************************************************/
@@ -56,15 +111,6 @@ void test__get_param(void) {
    /*       TEST_ASSERT_TRUE(done); */
    /*    } */
    /* } */
-}
-
-stcode_t dummy_handle(arg_t* args, void* usrargs) {
-   (void)usrargs;
-   (void)args;
-   /* int8_t r = TINYCMD_ARG(args, 0, int8_t); */
-   /* int16_t q = TINYCMD_ARG(args, 1, int16_t); */
-   /* int32_t f = TINYCMD_ARG(args, 2, int32_t); */
-   return ok_e;
 }
 
 void test__get_cmdinfo(void) {
@@ -252,6 +298,9 @@ void test__parse_string(void) {
    TEST_ASSERT_EQUAL_INT32((int32_t)null_ptr_e, (int32_t)ret);
 
    ret = _parse_str(rawstr, &table_sa, NULL);
+   TEST_ASSERT_EQUAL_INT32((int32_t)null_ptr_e, (int32_t)ret);
+
+   ret = _parse_str(rawstr, &table_sa, &handle);
    TEST_ASSERT_EQUAL_INT32((int32_t)inv_size_e, (int32_t)ret);
 
    /*************************************************************************/
@@ -371,7 +420,10 @@ stcode_t ctrlmode_handle(arg_t* args, void* usrargs) {
    return ok_e;
 }
 
+int32_t g_mtr_vin = 0;
+
 stcode_t set_mtr_vin(arg_t* args, void* usrargs) {
+  g_mtr_vin = TINYCMD_ARG(args, 0, int32_t);
   return ok_e;
 }
 
@@ -447,7 +499,7 @@ void test_cmd(void) {
    stcode_t ret;
    char rawstr[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq r10 f233 q-40";
    char rawstr1[TINYCMD_RAW_STR_MAX_SIZE] = "ctrlmode";
-   char rawstr_mtr_vin[TINYCMD_RAW_STR_MAX_SIZE] = "set_mtr_vin 10";
+   char rawstr_mtr_vin[TINYCMD_RAW_STR_MAX_SIZE] = "mtrvin 10";
    /*************************************************************************/
    /* TEST ARGUMENT VALIDATION **********************************************/
    /*************************************************************************/
@@ -466,4 +518,7 @@ void test_cmd(void) {
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
    ret = tinycmd_exec(rawstr1);
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
+   ret = tinycmd_exec(rawstr_mtr_vin);
+   TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
+   TEST_ASSERT_EQUAL_INT32(10, g_mtr_vin);
 }
