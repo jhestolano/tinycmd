@@ -20,7 +20,7 @@
 /* as the command only allows for one unique argument. */
 #define TINYCMD_UNIQUE_ARG ('\0')
 
-const char* TinyCmdDelimStr = " ";
+extern const char* TinyCmdDelimStr;
 
 typedef enum argtype_e {
   arg_u8_e = 0,
@@ -42,7 +42,6 @@ typedef struct argdef_s {
 typedef struct arg_s {
   const argdef_t* def;
   uint8_t data[TINYCMD_ARG_BYTES_MAX_SIZE];
-  /* tinycmd_base_t data; */
   uint8_t is_valid;
 } arg_t;
 
@@ -53,7 +52,9 @@ typedef struct arg_s {
 #define TINYCMD_TABLE_SIZE(x) (sizeof((x)) / sizeof(cmddef_t))
 #define TINYCMD_ARG_IS_VALID(_args, _idx) ((_args)[(_idx)].is_valid)
 #define TINYCMD_ARG(_args, _idx, _type) (_type)(*(((_type*)(&(_args)[(_idx)].data))))
-#define TINYCMD_ARG_NONE {{arg_none_type_e, 0}}
+#define TINYCMD_ARG_NAME_NONE ((char)0)
+#define TINYCMD_ARG_TYPE_NONE (arg_none_type_e)
+#define TINYCMD_ARG_NONE {{TINYCMD_ARG_TYPE_NONE, TINYCMD_ARG_NAME_NONE}}
 
 typedef enum stcode_e (*tinycmd_cb_t)(arg_t* arg, void* usrdata);
 
