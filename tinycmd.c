@@ -8,8 +8,6 @@
 
 STATIC tinycmd_t _cmdtab_ps = {0};
 
-const char* TinyCmdDelimStr = " ";
-
 typedef stcode_t (*strtonum_t)(const char* rawstr, void* buf);
 
 /* Holds the conversion functions from string to ints. The function call index */
