@@ -3,8 +3,13 @@
 #include <assert.h>
 #include <string.h>
 #include "utils.h"
-#include "tinycmd.h"
 #include "dbg.h"
+#include "tinycmd.h"
+
+void tinycmd_printf(const char* str) {
+  const char expected_msg[] = "help for command pwmfreq";
+  TEST_ASSERT_EQUAL_STRING(expected_msg, str);
+}
 
 stcode_t cmd_1(arg_t* args, void* usrargs) {
   (void)args;
@@ -20,7 +25,6 @@ stcode_t dummy_handle(arg_t* args, void* usrargs) {
    /* int32_t f = TINYCMD_ARG(args, 2, int32_t); */
    return ok_e;
 }
-
 
 extern stcode_t _get_cmddef(const char* cmdstr, const tinycmd_t * cmd_table, const cmddef_t** info);
 
@@ -230,53 +234,53 @@ void test__parse_string(void) {
       /*********************************************************************/
       {
          /* Command Name. */
-         "pwmfreq",
+         .name = "pwmfreq",
 
          /* Command Handle. */
-         dummy_handle,
+         .callback = dummy_handle,
 
          /* Argument Description. */
-         {
+         .argdef = {
             {arg_u8_e, 'r'},
             {arg_i16_e, 'q'},
             {arg_i32_e, 'f'},
          },
          /* User argument. */
-         NULL,
+         .usrdata = NULL,
       },
       /*********************************************************************/
       {
          /* Command Name. */
-         "pid",
+         .name = "pid",
 
          /* Command Handle. */
-         dummy_handle,
+         .callback = dummy_handle,
 
          /* Argument Description. */
-         {
+         .argdef = {
             {arg_i32_e, 'p'},
             {arg_i32_e, 'i'},
             {arg_i32_e, 'd'},
          },
          /* User argument. */
-         NULL,
+         .usrdata = NULL,
       },
       /*********************************************************************/
       {
          /* Command Name. */
-         "ctrlmode",
+         .name = "ctrlmode",
 
          /* Command Handle. */
-         dummy_handle,
+         .callback = dummy_handle,
 
          /* Argument Description. */
-         {
+         .argdef = {
             {arg_u8_e, 'x'},
             {arg_i16_e, 'y'},
             {arg_i32_e, 'z'},
          },
          /* User argument. */
-         NULL,
+         .usrdata = NULL,
       },
    };
 
@@ -438,31 +442,31 @@ void test_cmd(void) {
       /*********************************************************************/
       {
          /* Command Name. */
-         "pwmfreq",
+         .name = "pwmfreq",
 
          /* Command Handle. */
-         pwmfreq_handle,
+         .callback = pwmfreq_handle,
 
          /* Argument Description. */
-         {
+         .argdef = {
             {arg_u8_e, 'r'},
             {arg_i16_e, 'q'},
             {arg_i32_e, 'f'},
          },
 
          /* User Arguments */
-         (void*)&appdata,
+         .usrdata = (void*)&appdata,
       },
       /*********************************************************************/
       {
          /* Command Name. */
-         "pid",
+         .name = "pid",
 
          /* Command Handle. */
-         pid_handle,
+         .callback = pid_handle,
 
          /* Argument Description. */
-         {
+         .argdef = {
             {arg_i32_e, 'p'},
             {arg_i32_e, 'i'},
             {arg_i32_e, 'd'},
@@ -470,29 +474,32 @@ void test_cmd(void) {
          },
 
          /* User Arguments */
-         TINYCMD_ARG_USR_NONE,
+         .usrdata = TINYCMD_ARG_USR_NONE,
       },
       /*********************************************************************/
       {
          /* Command Name. */
-         "ctrlmode",
+         .name = "ctrlmode",
 
          /* Command Handle. */
-         ctrlmode_handle,
+         .callback = ctrlmode_handle,
 
          /* Arguments. */
-         TINYCMD_ARG_NONE,
+         .argdef = TINYCMD_ARG_NONE,
 
          /*User Arguments */
-         TINYCMD_ARG_USR_NONE,
+         .usrdata = TINYCMD_ARG_USR_NONE,
       },
       {
-        "mtrvin",
-        set_mtr_vin,
-        {
+        .name = "mtrvin",
+        
+        .callback = set_mtr_vin,
+
+        .argdef = {
           {arg_i32_e, TINYCMD_UNIQUE_ARG},
         },
-        TINYCMD_ARG_USR_NONE,
+
+        .usrdata = TINYCMD_ARG_USR_NONE,
       }
    };
 
@@ -521,4 +528,47 @@ void test_cmd(void) {
    ret = tinycmd_exec(rawstr_mtr_vin);
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
    TEST_ASSERT_EQUAL_INT32(10, g_mtr_vin);
+}
+
+void test_help(void) {
+   /*************************************************************************/
+   /* TEST SETUP ************************************************************/
+   /*************************************************************************/
+   cmddef_t info_a[] = {
+
+      /*********************************************************************/
+      {
+         /* Command Name. */
+         .name = "pwmfreq",
+
+         /* Command Handle. */
+         .callback = pwmfreq_handle,
+
+         /* Argument Description. */
+         .argdef = {
+            {arg_u8_e, 'r'},
+            {arg_i16_e, 'q'},
+            {arg_i32_e, 'f'},
+         },
+
+         /* User Arguments */
+         .usrdata = (void*)&appdata,
+
+         .helpmsg = "help for command pwmfreq",
+      },
+   };
+
+   stcode_t ret;
+   char rawstr_short[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq h";
+
+   ret = tinycmd_init(info_a, TINYCMD_TABLE_SIZE(info_a));
+   TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
+   /*************************************************************************/
+   /* TEST BODY AND VALIDATION **********************************************/
+   /*************************************************************************/
+   tinycmd_exec(rawstr_short);
+}
+
+void test_mixed_case(void) {
+
 }

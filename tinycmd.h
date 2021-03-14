@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include "st.h"
 
+/* Enable use and printing of command help. Compiling this out eliminates the need */
+/* to provide a print function. */
+#define TINYCMD_HELP_ENABLE (1)
+
 /* Max. number of raw data per argument. */
 #define TINYCMD_ARG_BYTES_MAX_SIZE (sizeof(uint32_t))
 
@@ -20,7 +24,11 @@
 /* as the command only allows for one unique argument. */
 #define TINYCMD_UNIQUE_ARG ('\0')
 
+#define TINYCMD_HELP_ARG ('h')
+
 extern const char* TinyCmdDelimStr;
+
+extern void tinycmd_printf(const char* str);
 
 typedef enum argtype_e {
   arg_u8_e = 0,
@@ -48,7 +56,6 @@ typedef struct arg_s {
 #define TINYCMD_ARG_LIST_END {arg_none_type_e, ''}
 #define TINYCMD_USRDATA_NONE ((void*)NULL)
 #define TINYCMD_ARG_USR_NONE (NULL)
-
 #define TINYCMD_TABLE_SIZE(x) (sizeof((x)) / sizeof(cmddef_t))
 #define TINYCMD_ARG_IS_VALID(_args, _idx) ((_args)[(_idx)].is_valid)
 #define TINYCMD_ARG(_args, _idx, _type) (_type)(*(((_type*)(&(_args)[(_idx)].data))))
@@ -63,6 +70,7 @@ typedef struct cmddef_s {
   const tinycmd_cb_t callback;
   const argdef_t argdef[TINYCMD_ARG_MAX_SIZE];
   void* usrdata;
+  const char* helpmsg;
 } cmddef_t;
 
 typedef struct cmd_s {

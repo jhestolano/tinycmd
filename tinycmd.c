@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "tinycmd.h"
 #include "dbg.h"
 #include "utils.h"
@@ -95,6 +96,14 @@ STATIC stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) 
   return ret;
 }
 
+#if TINYCMD_HELP_ENABLE
+STATIC void _print_help(const char* str) {
+  /* tinycmd_printf("%s\n\r", TINYCMD_HELP_BANNER_START); */
+  tinycmd_printf(str);
+  /* tinycmd_printf("%s\n\r", TINYCMD_HELP_BANNER_END); */
+}
+#endif
+
 STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
   stcode_t ret = generic_e;
   char* ctxptr = str;
@@ -113,10 +122,15 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
       DBG_DEBUG("Command: %s\n", tok);
       cmdname = tok;
       if((cmddef->argdef[0].name == 0) && (cmddef->argdef[0].type == arg_none_type_e)) {
-      /* If the command definition does not take any arguments, do not even bother */
-      /* trying to get them. */
+        /* If the command definition does not take any arguments, do not even bother */
+        /* trying to get them. */
+        ret = ok_e;
+      } else if(*ctxptr == TINYCMD_HELP_ARG) {
+        /* The ctxptr is already pointing to the following argument. If it is */
+        /* the help flag, there is no need to iterate. */
         ret = ok_e;
       } else {
+        DBG_DEBUG("Contetx ptr: %s\n\r", ctxptr);
         ret = _iter_args(ctxptr, cmddef, handle);
       }
     }
@@ -124,8 +138,22 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
       for(size_t i = 0; i < table->size; i++) {
         if(strcmp(table->cmdtab[i].name, cmdname) == 0) {
           DBG_DEBUG("Parsing command: %s OK!\n", table->cmdtab[i].name);
-          handle->callback = table->cmdtab[i].callback;
-          handle->usrdata = table->cmdtab[i].usrdata;
+          if(*ctxptr == TINYCMD_HELP_ARG) {
+            /* Detected the help argument previously. So omit the command callback */
+            /* and print the help message instead. */
+#if TINYCMD_HELP_ENABLE
+            _print_help(table->cmdtab[i].helpmsg);
+#endif
+
+            /* Setting the callback and the usrdata pointer to NULL lets downstream */
+            /* code that it should not call the callback function as this was */
+            /* already processed here. */
+            handle->callback = NULL;
+            handle->usrdata = NULL;
+          } else {
+            handle->callback = table->cmdtab[i].callback;
+            handle->usrdata = table->cmdtab[i].usrdata;
+          }
           break;
         }
       }
@@ -156,7 +184,10 @@ stcode_t tinycmd_exec(char* str) {
   stcode_t ret = generic_e;
   if(_cmdtab_ps.cmdtab && _cmdtab_ps.size && str) {
      ret = _parse_str(str, &_cmdtab_ps, &handle);
-     if (ret == ok_e) {
+     if (ret == ok_e && handle.callback) {
+        /* if handle.callback is not set to a value different from NULL, it means */
+        /* that the help callback was processed. So the following callback is not */
+        /* set and should not be called. */
         ret = handle.callback(handle.args, handle.usrdata);
      }
   }
@@ -169,4 +200,5 @@ stcode_t tinycmd_exec(char* str) {
 stcode_t tinycmd_loop(void) {
   return ok_e;
 }
+
 

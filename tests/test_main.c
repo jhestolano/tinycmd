@@ -14,6 +14,8 @@ extern void test__parse_string(void);
 extern void test__get_arg(void);
 extern void test__iter_args(void);
 extern void test_cmd(void);
+extern void test_help(void);
+extern void test_mixed_case(void);
 
 extern void test_line_all_tests(void);
 
@@ -29,6 +31,7 @@ int main(void) {
   RUN_TEST(test__parse_string);
   RUN_TEST(test__get_arg);
   RUN_TEST(test_cmd);
+  RUN_TEST(test_help);
   /* test_integration_all_tests(); */
   return UNITY_END();
 }
