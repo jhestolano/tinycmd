@@ -24,7 +24,18 @@
 /* as the command only allows for one unique argument. */
 #define TINYCMD_UNIQUE_ARG ('\0')
 
+/* Character that calls the help message for a command. */
 #define TINYCMD_HELP_ARG ('h')
+
+/* Char array that holds the characters that will be used as separators for words */
+/* or tokens in a command. Default: blank space. */
+#define TINYCMD_DELIM_STR (" ")
+
+/* Start banner for help message. */
+#define TINYCMD_HELP_BANNER_START ("\n\r********** TINYCMD HELP MSG **********\n\r")
+
+/* End banner for help message. */
+#define TINYCMD_HELP_BANNER_END ("\n\r**************************************\n\r")
 
 extern const char* TinyCmdDelimStr;
 

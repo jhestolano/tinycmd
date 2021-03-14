@@ -7,8 +7,25 @@
 #include "tinycmd.h"
 
 void tinycmd_printf(const char* str) {
-  const char expected_msg[] = "help for command pwmfreq";
-  TEST_ASSERT_EQUAL_STRING(expected_msg, str);
+  static uint8_t count = 0;
+  static const char expected_msg[] = "help for command pwmfreq";
+  switch(count) {
+    case 0:
+      TEST_ASSERT_EQUAL_STRING(TINYCMD_HELP_BANNER_START, str);
+      count++;
+      break;
+    case 1: 
+      TEST_ASSERT_EQUAL_STRING(expected_msg, str);
+      count++;
+      break;
+    case 2: 
+      TEST_ASSERT_EQUAL_STRING(TINYCMD_HELP_BANNER_END, str);
+      count++;
+      break;
+    default:
+      TEST_FAIL();
+      count = 3;
+  }
 }
 
 stcode_t cmd_1(arg_t* args, void* usrargs) {
@@ -567,8 +584,4 @@ void test_help(void) {
    /* TEST BODY AND VALIDATION **********************************************/
    /*************************************************************************/
    tinycmd_exec(rawstr_short);
-}
-
-void test_mixed_case(void) {
-
 }

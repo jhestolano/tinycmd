@@ -88,7 +88,7 @@ STATIC stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) 
   stcode_t ret = null_ptr_e;
   if(rawstr && cmddef && handle) {
     DBG_DEBUG("Raw string: %s\n", rawstr);
-    while((tok = strtok_r(ctxptr, " ", &ctxptr))) {
+    while((tok = strtok_r(ctxptr, (const char*)TINYCMD_DELIM_STR, &ctxptr))) {
       DBG_DEBUG("Token: %s\n", tok);
       ret = _get_arg(tok, cmddef->argdef, handle->args);
     }
@@ -98,9 +98,9 @@ STATIC stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) 
 
 #if TINYCMD_HELP_ENABLE
 STATIC void _print_help(const char* str) {
-  /* tinycmd_printf("%s\n\r", TINYCMD_HELP_BANNER_START); */
+  tinycmd_printf(TINYCMD_HELP_BANNER_START);
   tinycmd_printf(str);
-  /* tinycmd_printf("%s\n\r", TINYCMD_HELP_BANNER_END); */
+  tinycmd_printf(TINYCMD_HELP_BANNER_END);
 }
 #endif
 
