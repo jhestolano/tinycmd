@@ -576,7 +576,7 @@ void test_help(void) {
    };
 
    stcode_t ret;
-   char rawstr_short[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq h";
+   char rawstr_short[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq ?";
 
    ret = tinycmd_init(info_a, TINYCMD_TABLE_SIZE(info_a));
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);

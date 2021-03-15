@@ -25,7 +25,7 @@
 #define TINYCMD_UNIQUE_ARG ('\0')
 
 /* Character that calls the help message for a command. */
-#define TINYCMD_HELP_ARG ('h')
+#define TINYCMD_HELP_ARG ('?')
 
 /* Char array that holds the characters that will be used as separators for words */
 /* or tokens in a command. Default: blank space. */
