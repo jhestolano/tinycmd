@@ -1,16 +1,21 @@
 PROJ_NAME=tinycmd
 BUILD_DIR=./build
 
-
 TESTS_DIR=./tests
 
 INC_DIRS=. \
+	string \
+	utils \
 	$(TESTS_DIR) \
 	$(TESTS_DIR)/Unity \
 
 SRCS=tinycmd.c \
 	st.c \
-	utils.c \
+	utils/utils.c \
+	string/memcpy.c \
+	string/memset.c \
+	string/strcmp.c \
+	string/strtok.c \
 
 TEST_SRCS=$(TESTS_DIR)/test_main.c \
 	$(TESTS_DIR)/test_cmd.c \

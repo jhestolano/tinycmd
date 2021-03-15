@@ -86,7 +86,7 @@ STATIC stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) 
   stcode_t ret = null_ptr_e;
   if(rawstr && cmddef && handle) {
     DBG_DEBUG("Raw string: %s\n", rawstr);
-    while((tok = strtok_r(ctxptr, (const char*)TINYCMD_DELIM_STR, &ctxptr))) {
+    while((tok = __strtok_r(ctxptr, (const char*)TINYCMD_DELIM_STR, &ctxptr))) {
       DBG_DEBUG("Token: %s\n", tok);
       ret = _get_arg(tok, cmddef->argdef, handle->args);
     }
@@ -111,7 +111,7 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
   if(str && table && table->size && handle) {
     DBG_DEBUG("Raw string: %s\n", str);
     memset(handle->args, 0, sizeof(arg_t) * (TINYCMD_ARG_MAX_SIZE));
-    tok = strtok_r(ctxptr, " ", &ctxptr);
+    tok = __strtok_r(ctxptr, " ", &ctxptr);
     ret = _get_cmddef(tok, table, &cmddef);
     if(!cmddef) {
       ret = internal_e;
@@ -123,7 +123,7 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
         /* If the command definition does not take any arguments, do not even bother */
         /* trying to get them. */
         ret = ok_e;
-      } else if(*ctxptr == TINYCMD_HELP_ARG) {
+      } else if(ctxptr && (*ctxptr == TINYCMD_HELP_ARG)) {
         /* The ctxptr is already pointing to the following argument. If it is */
         /* the help flag, there is no need to iterate. */
         ret = ok_e;
@@ -136,7 +136,7 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
       for(size_t i = 0; i < table->size; i++) {
         if(strcmp(table->cmdtab[i].name, cmdname) == 0) {
           DBG_DEBUG("Parsing command: %s OK!\n", table->cmdtab[i].name);
-          if(*ctxptr == TINYCMD_HELP_ARG) {
+          if(ctxptr && (*ctxptr == TINYCMD_HELP_ARG)) {
             /* Detected the help argument previously. So omit the command callback */
             /* and print the help message instead. */
 #if TINYCMD_HELP_ENABLE
