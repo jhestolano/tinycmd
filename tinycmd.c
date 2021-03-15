@@ -140,9 +140,9 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
             /* Detected the help argument previously. So omit the command callback */
             /* and print the help message instead. */
 #if TINYCMD_HELP_ENABLE
+            DBG_DEBUG("Help argument detected.\n\r");
             _print_help(table->cmdtab[i].helpmsg);
 #endif
-
             /* Setting the callback and the usrdata pointer to NULL lets downstream */
             /* code that it should not call the callback function as this was */
             /* already processed here. */
@@ -181,13 +181,14 @@ stcode_t tinycmd_exec(char* str) {
   cmd_t handle;
   stcode_t ret = generic_e;
   if(_cmdtab_ps.cmdtab && _cmdtab_ps.size && str) {
-     ret = _parse_str(str, &_cmdtab_ps, &handle);
-     if (ret == ok_e && handle.callback) {
-        /* if handle.callback is not set to a value different from NULL, it means */
-        /* that the help callback was processed. So the following callback is not */
-        /* set and should not be called. */
-        ret = handle.callback(handle.args, handle.usrdata);
-     }
+    (void)utils_strlow(str);
+    ret = _parse_str(str, &_cmdtab_ps, &handle);
+    if (ret == ok_e && handle.callback) {
+      /* if handle.callback is not set to a value different from NULL, it means */
+      /* that the help callback was processed. So the following callback is not */
+      /* set and should not be called. */
+      ret = handle.callback(handle.args, handle.usrdata);
+    }
   }
   else {
      ret = str ? not_initialized_e : null_ptr_e;

@@ -23,7 +23,7 @@ void tinycmd_printf(const char* str) {
       count++;
       break;
     default:
-      TEST_FAIL();
+      TEST_FAIL_MESSAGE("tinycmd_printf called more times than expected!");
       count = 3;
   }
 }
@@ -576,12 +576,15 @@ void test_help(void) {
    };
 
    stcode_t ret;
-   char rawstr_short[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq ?";
+
+   /* Command should be detected even if the letter case is mixed. */
+   char rawstr_mixed[TINYCMD_RAW_STR_MAX_SIZE] = "pWmFReq ?";
 
    ret = tinycmd_init(info_a, TINYCMD_TABLE_SIZE(info_a));
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
    /*************************************************************************/
    /* TEST BODY AND VALIDATION **********************************************/
    /*************************************************************************/
-   tinycmd_exec(rawstr_short);
+   tinycmd_exec(rawstr_mixed);
 }
+

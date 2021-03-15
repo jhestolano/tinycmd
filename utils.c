@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define _BUFOP_TO   0
 #define _BUFOP_FROM 1
@@ -132,6 +133,19 @@ stcode_t utils_strtoi16(const char* rawstr, void* buf) {
     ret = utils_to_bytes(buf, sizeof(int16_t), &tmp, sizeof(int16_t));
   } else {
     ret = (ret != ok_e) ? out_of_range_e : ret;
+  }
+  return ret;
+}
+
+stcode_t utils_strlow(char* str) {
+  stcode_t ret = null_ptr_e;
+  size_t i = 0;
+  if(str) {
+    while(str[i] != (char)0) {
+      str[i] = tolower(str[i]);
+      i++;
+    }
+    ret = ok_e;
   }
   return ret;
 }

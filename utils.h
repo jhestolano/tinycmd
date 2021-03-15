@@ -18,5 +18,6 @@ stcode_t utils_strtou32(const char* rawstr, void* buf);
 stcode_t utils_strtoi8(const char* rawstr, void* buf);
 stcode_t utils_strtoi16(const char* rawstr, void* buf);
 stcode_t utils_strtoi32(const char* rawstr, void* buf);
+stcode_t utils_strlow(char* str);
 
 #endif
