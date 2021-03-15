@@ -1,5 +1,6 @@
 PROJ_NAME=tinycmd
 BUILD_DIR=./build
+LIB_PREFIX=lib
 
 TESTS_DIR=./tests
 
@@ -49,7 +50,9 @@ INCLUDE=$(addprefix -I,$(INC_DIRS))
 # Use compiler flags w/ optimizations turned for libraries, as it most likely
 # this will not need to be debugged. Use the same LIB_FLAGS for all libraries.
 # $(HAL_OBJS): CFLAGS:=$(LIB_FLAGS)
-$(BUILD_DIR)/$(PROJ_NAME): $(OBJS)
+#
+$(BUILD_DIR)/$(LIB_PREFIX)$(PROJ_NAME):LFLAGS+=-nolibc
+$(BUILD_DIR)/$(LIB_PREFIX)$(PROJ_NAME): $(OBJS)
 	$(AR) rcs $@.a $^
 
 $(BUILD_DIR)/%.c.o: %.c
