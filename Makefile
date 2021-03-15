@@ -11,6 +11,10 @@ INC_DIRS=. \
 SRCS=tinycmd.c \
 	st.c \
 	utils.c \
+	memcpy.c \
+	memset.c \
+	strcmp.c \
+	strtok.c \
 
 TEST_SRCS=$(TESTS_DIR)/test_main.c \
 	$(TESTS_DIR)/test_cmd.c \
