@@ -67,35 +67,35 @@ typedef struct arg_s {
 #define TINYCMD_ARG_LIST_END {arg_none_type_e, ''}
 #define TINYCMD_USRDATA_NONE ((void*)NULL)
 #define TINYCMD_ARG_USR_NONE (NULL)
-#define TINYCMD_TABLE_SIZE(x) (sizeof((x)) / sizeof(cmddef_t))
+#define TINYCMD_TABLE_SIZE(x) (sizeof((x)) / sizeof(tinycmd_t))
 #define TINYCMD_ARG_IS_VALID(_args, _idx) ((_args)[(_idx)].is_valid)
 #define TINYCMD_ARG(_args, _idx, _type) (_type)(*(((_type*)(&(_args)[(_idx)].data))))
 #define TINYCMD_ARG_NAME_NONE ((char)0)
 #define TINYCMD_ARG_TYPE_NONE (arg_none_type_e)
 #define TINYCMD_ARG_NONE {{TINYCMD_ARG_TYPE_NONE, TINYCMD_ARG_NAME_NONE}}
 
-typedef enum stcode_e (*tinycmd_cb_t)(arg_t* arg, void* usrdata);
+typedef enum stcode_e (*tinycmd_cb_t)(arg_t* arg, void* user_data);
 
 typedef struct cmddef_s {
   const char name[TINYCMD_NAME_MAX_SIZE];
   const tinycmd_cb_t callback;
-  const argdef_t argdef[TINYCMD_ARG_MAX_SIZE];
-  void* usrdata;
-  const char* helpmsg;
-} cmddef_t;
+  const argdef_t args[TINYCMD_ARG_MAX_SIZE];
+  void* user_data;
+  const char* help;
+} tinycmd_t;
 
 typedef struct cmd_s {
   tinycmd_cb_t callback;
   arg_t args[TINYCMD_ARG_MAX_SIZE];
-  void* usrdata;
+  void* user_data;
 } cmd_t;
 
-typedef struct tinycmd_s {
-  const cmddef_t* cmdtab;
+typedef struct tinycmd_tab_s {
+  const tinycmd_t* cmdtab;
   size_t size;
-} tinycmd_t;
+} tinycmd_tab_t;
 
-stcode_t tinycmd_init(const cmddef_t* table, size_t size);
+stcode_t tinycmd_init(const tinycmd_t* table, size_t size);
 
 stcode_t tinycmd_exec(char* str);
 

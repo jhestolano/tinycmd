@@ -72,5 +72,6 @@ debug: $(BUILD_DIR)/$(PROJ_NAME)
 tests:DEFS+=-DUNIT_TEST
 tests: $(TEST_OBJS) $(OBJS)
 	$(CC) $(INCLUDE) $(DEFS) $(CFLAGS) $^ -o $(BUILD_DIR)/$@.out $(LFLAGS)
+	./$(BUILD_DIR)/$@.out
 
 .PHONY: clean $(PROJ_NAME) debug tests

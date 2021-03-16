@@ -43,15 +43,15 @@ stcode_t dummy_handle(arg_t* args, void* usrargs) {
    return ok_e;
 }
 
-extern stcode_t _get_cmddef(const char* cmdstr, const tinycmd_t * cmd_table, const cmddef_t** info);
+extern stcode_t _get_cmddef(const char* cmdstr, const tinycmd_tab_t * cmd_table, const tinycmd_t** info);
 
 /* extern stcode_t _get_param(const char* rawstr, char* param, uint8_t* done); */
 
-extern stcode_t _parse_str(const char* rawstr, const tinycmd_t* table_sa, cmd_t* handle);
+extern stcode_t _parse_str(const char* rawstr, const tinycmd_tab_t* table_sa, cmd_t* handle);
 
 extern stcode_t _get_arg(const char* rawstr, const argdef_t* argdesc_a, arg_t* arg);
 
-extern stcode_t _iter_args(char *str, const cmddef_t* cmddef, cmd_t* handle);
+extern stcode_t _iter_args(char *str, const tinycmd_t* cmddef, cmd_t* handle);
 
 void test__iter_args(void) {
   stcode_t res;
@@ -59,7 +59,7 @@ void test__iter_args(void) {
   /* char* tok; */
   char rawstr[] = "p124 i-12 d44";
   cmd_t handle;
-  cmddef_t cmddef = {
+  tinycmd_t cmddef = {
      /* Command Name. */
      .name = "pid",
 
@@ -67,14 +67,14 @@ void test__iter_args(void) {
      .callback = dummy_handle,
 
      /* Argument Description. */
-     .argdef = {
+     .args = {
         {.type = arg_i32_e, .name = 'p'},
         {.type = arg_i32_e, .name = 'i'},
         {.type = arg_i32_e, .name = 'd'},
      },
 
      /* User argument. */
-     .usrdata = NULL,
+     .user_data = NULL,
   };
 
   memset((void*)&handle, 0, sizeof(handle));
@@ -141,7 +141,7 @@ void test__get_cmdinfo(void) {
 
    uint8_t i;
 
-   const cmddef_t info_a[] = {
+   const tinycmd_t info_a[] = {
 
       /*********************************************************************/
       {
@@ -199,9 +199,9 @@ void test__get_cmdinfo(void) {
       },
    };
 
-   tinycmd_t cmdtable = { info_a, sizeof(info_a) / sizeof(cmddef_t) };
+   tinycmd_tab_t cmdtable = { info_a, sizeof(info_a) / sizeof(tinycmd_t) };
 
-   const cmddef_t* p_cmdinfo_s;
+   const tinycmd_t* p_cmdinfo_s;
    char cmdname[] = "pwmfreq";
    stcode_t ret;
 
@@ -219,7 +219,7 @@ void test__get_cmdinfo(void) {
    cmdtable.size = 0;
    ret = _get_cmddef("pwmfreq", &cmdtable, &p_cmdinfo_s);
    TEST_ASSERT_EQUAL_INT32((int32_t)inv_size_e, (int32_t)ret);
-   cmdtable.size = sizeof(info_a) / sizeof(cmddef_t);
+   cmdtable.size = sizeof(info_a) / sizeof(tinycmd_t);
 
    /*************************************************************************/
    /* TEST BODY AND VALIDATION **********************************************/
@@ -228,7 +228,7 @@ void test__get_cmdinfo(void) {
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
    TEST_ASSERT_TRUE(cmdtable.cmdtab == p_cmdinfo_s);
 
-   for (i = 0; i < sizeof(info_a) / sizeof(cmddef_t); i++) {
+   for (i = 0; i < sizeof(info_a) / sizeof(tinycmd_t); i++) {
       ret = _get_cmddef(cmdname_a[i], &cmdtable, &p_cmdinfo_s);
       TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
       TEST_ASSERT_TRUE(&cmdtable.cmdtab[i] == p_cmdinfo_s);
@@ -246,7 +246,7 @@ void test__parse_string(void) {
    /* TEST SETUP ************************************************************/
    /*************************************************************************/
 
-   const cmddef_t info_a[] = {
+   const tinycmd_t info_a[] = {
 
       /*********************************************************************/
       {
@@ -257,13 +257,13 @@ void test__parse_string(void) {
          .callback = dummy_handle,
 
          /* Argument Description. */
-         .argdef = {
+         .args = {
             {arg_u8_e, 'r'},
             {arg_i16_e, 'q'},
             {arg_i32_e, 'f'},
          },
          /* User argument. */
-         .usrdata = NULL,
+         .user_data = NULL,
       },
       /*********************************************************************/
       {
@@ -274,13 +274,13 @@ void test__parse_string(void) {
          .callback = dummy_handle,
 
          /* Argument Description. */
-         .argdef = {
+         .args = {
             {arg_i32_e, 'p'},
             {arg_i32_e, 'i'},
             {arg_i32_e, 'd'},
          },
          /* User argument. */
-         .usrdata = NULL,
+         .user_data = NULL,
       },
       /*********************************************************************/
       {
@@ -291,20 +291,20 @@ void test__parse_string(void) {
          .callback = dummy_handle,
 
          /* Argument Description. */
-         .argdef = {
+         .args = {
             {arg_u8_e, 'x'},
             {arg_i16_e, 'y'},
             {arg_i32_e, 'z'},
          },
          /* User argument. */
-         .usrdata = NULL,
+         .user_data = NULL,
       },
    };
 
    stcode_t ret;
    char rawstr[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq f233 r10 q-40";
 
-   tinycmd_t table_sa;
+   tinycmd_tab_t table_sa;
    cmd_t handle = { NULL, {{0}}, NULL };
    table_sa.cmdtab = &info_a[0];
    table_sa.size = 0;
@@ -327,7 +327,7 @@ void test__parse_string(void) {
    /*************************************************************************/
    /* TEST BODY AND VALIDATION **********************************************/
    /*************************************************************************/
-   table_sa.size = sizeof(info_a) / sizeof(cmddef_t);
+   table_sa.size = sizeof(info_a) / sizeof(tinycmd_t);
    ret = _parse_str(rawstr, &table_sa, &handle);
    TEST_ASSERT_TRUE(handle.callback == dummy_handle);
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
@@ -454,7 +454,7 @@ void test_cmd(void) {
    /*************************************************************************/
 
 
-   cmddef_t info_a[] = {
+   tinycmd_t info_a[] = {
 
       /*********************************************************************/
       {
@@ -465,14 +465,14 @@ void test_cmd(void) {
          .callback = pwmfreq_handle,
 
          /* Argument Description. */
-         .argdef = {
+         .args = {
             {arg_u8_e, 'r'},
             {arg_i16_e, 'q'},
             {arg_i32_e, 'f'},
          },
 
          /* User Arguments */
-         .usrdata = (void*)&appdata,
+         .user_data = (void*)&appdata,
       },
       /*********************************************************************/
       {
@@ -483,7 +483,7 @@ void test_cmd(void) {
          .callback = pid_handle,
 
          /* Argument Description. */
-         .argdef = {
+         .args = {
             {arg_i32_e, 'p'},
             {arg_i32_e, 'i'},
             {arg_i32_e, 'd'},
@@ -491,7 +491,7 @@ void test_cmd(void) {
          },
 
          /* User Arguments */
-         .usrdata = TINYCMD_ARG_USR_NONE,
+         .user_data = TINYCMD_ARG_USR_NONE,
       },
       /*********************************************************************/
       {
@@ -502,21 +502,21 @@ void test_cmd(void) {
          .callback = ctrlmode_handle,
 
          /* Arguments. */
-         .argdef = TINYCMD_ARG_NONE,
+         .args = TINYCMD_ARG_NONE,
 
          /*User Arguments */
-         .usrdata = TINYCMD_ARG_USR_NONE,
+         .user_data = TINYCMD_ARG_USR_NONE,
       },
       {
         .name = "mtrvin",
         
         .callback = set_mtr_vin,
 
-        .argdef = {
+        .args = {
           {arg_i32_e, TINYCMD_UNIQUE_ARG},
         },
 
-        .usrdata = TINYCMD_ARG_USR_NONE,
+        .user_data = TINYCMD_ARG_USR_NONE,
       }
    };
 
@@ -531,7 +531,7 @@ void test_cmd(void) {
    TEST_ASSERT_EQUAL_INT32((int32_t)null_ptr_e, (int32_t)ret);
    ret = tinycmd_init(info_a, 0);
    TEST_ASSERT_EQUAL_INT32((int32_t)inv_size_e, (int32_t)ret);
-   ret = tinycmd_init(info_a, sizeof(info_a) / sizeof(cmddef_t));
+   ret = tinycmd_init(info_a, sizeof(info_a) / sizeof(tinycmd_t));
    TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
    /*************************************************************************/
    /* TEST BODY AND VALIDATION **********************************************/
@@ -551,7 +551,7 @@ void test_help(void) {
    /*************************************************************************/
    /* TEST SETUP ************************************************************/
    /*************************************************************************/
-   cmddef_t info_a[] = {
+   tinycmd_t info_a[] = {
 
       /*********************************************************************/
       {
@@ -562,16 +562,16 @@ void test_help(void) {
          .callback = pwmfreq_handle,
 
          /* Argument Description. */
-         .argdef = {
+         .args = {
             {arg_u8_e, 'r'},
             {arg_i16_e, 'q'},
             {arg_i32_e, 'f'},
          },
 
          /* User Arguments */
-         .usrdata = (void*)&appdata,
+         .user_data = (void*)&appdata,
 
-         .helpmsg = "help for command pwmfreq",
+         .help = "help for command pwmfreq",
       },
    };
 

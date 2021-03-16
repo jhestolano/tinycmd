@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "staticdef.h"
 
-STATIC tinycmd_t _cmdtab_ps = {0};
+STATIC tinycmd_tab_t _cmdtab_ps = {0};
 
 typedef stcode_t (*strtonum_t)(const char* rawstr, void* buf);
 
@@ -58,11 +58,11 @@ STATIC stcode_t _get_arg(char *rawstr, const argdef_t* argdef_a, arg_t* arg) {
   return ret;
 }
 
-STATIC stcode_t _get_cmddef(char* cmdstr, const tinycmd_t * table, const cmddef_t** cmddef) {
+STATIC stcode_t _get_cmddef(char* cmdstr, const tinycmd_tab_t * table, const tinycmd_t** cmddef) {
   stcode_t ret = generic_e;
   uint8_t i;
   size_t table_sz;
-  const cmddef_t* cmd_a;
+  const tinycmd_t* cmd_a;
   if(cmdstr && table && table->size && table->cmdtab && cmddef) {
     cmd_a = table->cmdtab;
     table_sz = table->size;
@@ -80,7 +80,7 @@ STATIC stcode_t _get_cmddef(char* cmdstr, const tinycmd_t * table, const cmddef_
   return ret;
 }
 
-STATIC stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) {
+STATIC stcode_t _iter_args(char* rawstr, const tinycmd_t* cmddef, cmd_t* handle) {
   char* ctxptr = rawstr;
   char* tok;
   stcode_t ret = null_ptr_e;
@@ -88,7 +88,7 @@ STATIC stcode_t _iter_args(char* rawstr, const cmddef_t* cmddef, cmd_t* handle) 
     DBG_DEBUG("Raw string: %s\n", rawstr);
     while((tok = __strtok_r(ctxptr, (const char*)TINYCMD_DELIM_STR, &ctxptr))) {
       DBG_DEBUG("Token: %s\n", tok);
-      ret = _get_arg(tok, cmddef->argdef, handle->args);
+      ret = _get_arg(tok, cmddef->args, handle->args);
     }
   }
   return ret;
@@ -102,12 +102,12 @@ STATIC void _print_help(const char* str) {
 }
 #endif
 
-STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
+STATIC stcode_t _parse_str(char* str, const tinycmd_tab_t* table, cmd_t* handle) {
   stcode_t ret = generic_e;
   char* ctxptr = str;
   char* tok;
   char* cmdname;
-  const cmddef_t* cmddef;
+  const tinycmd_t* cmddef;
   if(str && table && table->size && handle) {
     DBG_DEBUG("Raw string: %s\n", str);
     memset(handle->args, 0, sizeof(arg_t) * (TINYCMD_ARG_MAX_SIZE));
@@ -119,7 +119,7 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
     } if (ret == ok_e) {
       DBG_DEBUG("Command: %s\n", tok);
       cmdname = tok;
-      if((cmddef->argdef[0].name == 0) && (cmddef->argdef[0].type == arg_none_type_e)) {
+      if((cmddef->args[0].name == 0) && (cmddef->args[0].type == arg_none_type_e)) {
         /* If the command definition does not take any arguments, do not even bother */
         /* trying to get them. */
         ret = ok_e;
@@ -141,16 +141,16 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
             /* and print the help message instead. */
 #if TINYCMD_HELP_ENABLE
             DBG_DEBUG("Help argument detected.\n\r");
-            _print_help(table->cmdtab[i].helpmsg);
+            _print_help(table->cmdtab[i].help);
 #endif
-            /* Setting the callback and the usrdata pointer to NULL lets downstream */
+            /* Setting the callback and the user_data pointer to NULL lets downstream */
             /* code that it should not call the callback function as this was */
             /* already processed here. */
             handle->callback = NULL;
-            handle->usrdata = NULL;
+            handle->user_data = NULL;
           } else {
             handle->callback = table->cmdtab[i].callback;
-            handle->usrdata = table->cmdtab[i].usrdata;
+            handle->user_data = table->cmdtab[i].user_data;
           }
           break;
         }
@@ -163,7 +163,7 @@ STATIC stcode_t _parse_str(char* str, const tinycmd_t* table, cmd_t* handle) {
   return ret;
 }
 
-stcode_t tinycmd_init(const cmddef_t* table, size_t size) {
+stcode_t tinycmd_init(const tinycmd_t* table, size_t size) {
    stcode_t ret = inv_arg_e;
   _cmdtab_ps.cmdtab = NULL;
   _cmdtab_ps.size = 0;
@@ -187,7 +187,7 @@ stcode_t tinycmd_exec(char* str) {
       /* if handle.callback is not set to a value different from NULL, it means */
       /* that the help callback was processed. So the following callback is not */
       /* set and should not be called. */
-      ret = handle.callback(handle.args, handle.usrdata);
+      ret = handle.callback(handle.args, handle.user_data);
     }
   }
   else {
