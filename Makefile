@@ -26,6 +26,7 @@ LIB_SRCS=libc/src/string/memcpy.c \
 	libc/src/string/strcmp.c \
 	libc/src/string/strtok.c \
 	libc/src/stdlib/strtoul.c \
+	libc/src/stdlib/strtof.c \
 	libc/printf/printf.c \
 
 TEST_SRCS=$(TESTS_DIR)/test_main.c \
