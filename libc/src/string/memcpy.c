@@ -31,7 +31,6 @@
  */
 
 #include <string.h>
-#include <stdint.h>
 
 /*
  * sizeof(word) MUST BE A POWER OF TWO

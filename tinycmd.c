@@ -10,6 +10,8 @@ STATIC tinycmd_tab_t _cmdtab_ps = {0};
 
 typedef stcode_t (*strtonum_t)(const char* rawstr, void* buf);
 
+extern char* __strtok_r(char*, const char*, char**);
+
 /* Holds the conversion functions from string to ints. The function call index */
 /* must match that of the enumeration, as it is used as the actual index. */
 STATIC const strtonum_t _strtonum_fp[] = {

@@ -37,7 +37,6 @@
 #include <stdio.h>
 #endif
 #include <string.h>
-#include <stdint.h>
 
 char* __strtok_r(char* /*s*/ /*s*/, const char* /*delim*/ /*delim*/, char** /*last*/ /*last*/);
 
