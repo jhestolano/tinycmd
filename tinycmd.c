@@ -21,6 +21,7 @@ STATIC const strtonum_t _strtonum_fp[] = {
   utils_strtoi8,
   utils_strtoi16,
   utils_strtoi32,
+  utils_strtof32,
   NULL,
 };
 

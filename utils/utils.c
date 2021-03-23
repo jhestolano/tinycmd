@@ -137,6 +137,20 @@ stcode_t utils_strtoi16(const char* rawstr, void* buf) {
   return ret;
 }
 
+stcode_t utils_strtof32(const char* rawstr, void* buf) {
+  stcode_t ret = not_implemented_e;
+  float num;
+  char* ctxptr;
+  if(rawstr && buf && strlen(rawstr)) {
+    num = strtof(rawstr, &ctxptr);
+    ret = utils_to_bytes(buf, sizeof(float), &num, sizeof(float));
+
+  } else {
+    ret = ( rawstr && buf ) ? inv_size_e : null_ptr_e;
+  }
+  return ret;
+}
+
 stcode_t utils_strlow(char* str) {
   stcode_t ret = null_ptr_e;
   size_t i = 0;

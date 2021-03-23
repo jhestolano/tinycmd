@@ -18,23 +18,18 @@ INC_DIRS=. \
 	$(LIBC)/arch/$(ARCH)/include \
 
 SRCS=tinycmd.c \
+	start.c \
 	st.c \
-	putchar.c \
 	utils/utils.c \
 
-LIB_SRCS=libc/src/string/memcpy.c \
-	libc/src/string/strcmp.c \
-	libc/src/string/strtok.c \
-	libc/src/stdlib/strtoul.c \
-	libc/src/stdlib/strtof.c \
-	libc/printf/printf.c \
+LIB_SRCS:=$(shell find $(LIBC) -name "*.c" -or -name "*.s")
 
-TEST_SRCS=$(TESTS_DIR)/test_main.c \
+TEST_SRCS:=$(TESTS_DIR)/test_main.c \
 	$(TESTS_DIR)/test_cmd.c \
 	$(TESTS_DIR)/Unity/unity.c \
  
-OBJS:=$(SRCS:%=$(BUILD_DIR)/%.o)
-OBJS+=$(LIB_SRCS:%=$(BUILD_DIR)/%.o)
+OBJS:=$(SRCS:%=$(BUILD_DIR)/%.o) \
+	$(LIB_SRCS:%=$(BUILD_DIR)/%.o)
 
 TEST_OBJS:=$(TEST_SRCS:%=$(BUILD_DIR)/%.o)
 
@@ -56,6 +51,7 @@ CFLAGS=$(TARGET_FLAGS) \
 	-O0 \
 	-Wall \
 	-fno-builtin \
+	-nostdlib \
 
 LFLAGS=$(TARGET_FLAGS) \
 	# -L$(LIBC_BUILD_DIR) \
