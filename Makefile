@@ -18,7 +18,6 @@ INC_DIRS=. \
 	$(LIBC)/arch/$(ARCH)/include \
 
 SRCS=tinycmd.c \
-	start.c \
 	st.c \
 	utils/utils.c \
 
@@ -48,14 +47,10 @@ TARGET_FLAGS=
 
 CFLAGS=$(TARGET_FLAGS) \
 	-g \
-	-O0 \
+	-Os \
 	-Wall \
-	-fno-builtin \
-	-nostdlib \
 
 LFLAGS=$(TARGET_FLAGS) \
-	# -L$(LIBC_BUILD_DIR) \
-	# -lc \
 
 INCLUDE=$(addprefix -I,$(INC_DIRS))
 
