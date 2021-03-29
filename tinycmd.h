@@ -48,7 +48,7 @@ typedef enum argtype_e {
   arg_i8_e,
   arg_i16_e,
   arg_i32_e,
-  arg_str_e,
+  arg_f32_e,
   arg_none_type_e = 254,
   arg_inv_type_e = 255,
 } argtype_t;

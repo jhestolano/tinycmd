@@ -427,6 +427,15 @@ stcode_t pwmfreq_handle(arg_t* args, void* usrargs) {
    return ok_e;
 }
 
+stcode_t pwmfreq_f32_handle(arg_t* args, void* usrargs) {
+   float f = TINYCMD_ARG(args, 0, float);
+
+   TEST_ASSERT_FLOAT_WITHIN(1.e-4f, -320.33f, f);
+   TEST_ASSERT_TRUE(TINYCMD_ARG_IS_VALID(args, 0));
+
+   return ok_e;
+}
+
 stcode_t pid_handle(arg_t* args, void* usrargs) {
    (void)args;
    (void)usrargs;
@@ -588,3 +597,36 @@ void test_help(void) {
    tinycmd_exec(rawstr_mixed);
 }
 
+void test_floating(void) {
+
+  tinycmd_t info_a[] = {
+    {
+      /* Command Name. */
+      .name = "pwmfreq",
+
+      /* Command Handle. */
+      .callback = pwmfreq_f32_handle,
+
+      /* Argument Description. */
+      .args = {
+        {arg_f32_e, 'f'},
+      },
+
+      /* User Arguments */
+      .user_data = NULL,
+
+      .help = "Dummy pwmfreq command.",
+    },
+  };
+
+  char rawcmd[TINYCMD_RAW_STR_MAX_SIZE] = "pwmfreq f-320.33";
+  stcode_t ret;
+
+  ret = tinycmd_init(info_a, TINYCMD_TABLE_SIZE(info_a));
+  TEST_ASSERT_EQUAL_INT32((int32_t)ok_e, (int32_t)ret);
+
+  /*************************************************************************/
+  /* TEST BODY AND VALIDATION **********************************************/
+  /*************************************************************************/
+  tinycmd_exec(rawcmd);
+}
